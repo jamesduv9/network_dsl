@@ -1,0 +1,86 @@
+#Goal is to exhibit all possible (non-conflicting) functionality of the model
+#Used by test scripts to validate functionality
+
+device:
+  "@xmlns": "https://github.com/jamesduv9/network_dsl/device_validator.yang"
+  type: CiscoIOSXE_WAN
+  device_lab_ip: 192.168.1.61
+  device_prod_ip: 200.1.1.62
+  interface_mapping:
+    - prod_interface: GigabitEthernet0/1
+      lab_interface: GigabitEthernet1
+    - prod_interface: GigabitEthernet0/2
+      lab_interface: GigabitEthernet2
+    - prod_interface: GigabitEthernet0/3
+      lab_interface: GigabitEthernet3
+    - prod_interface: GigabitEthernet0/4
+      lab_interface: GigabitEthernet4
+  ip_route:
+    global:
+      - prefix: 2.2.2.2
+        mask: 255.255.255.255
+        next_hop_both: 
+          next_hop_ip: 192.168.100.2
+          next_hop_interface: GigabitEthernet1
+
+  router_bgp:
+    asn: 65000
+    router_id: 192.168.1.1
+   
+    neighbor:
+      - neighbor_ip: 2.2.2.2
+        shutdown: false
+        remote_as: 65000
+        disable_connected_check: true
+      - neighbor_ip: 1.1.1.2
+        shutdown: false
+        remote_as: 65000
+        disable_connected_check: true
+    address_family:
+      ipv4_unicast:
+        network:
+          - ip_network: 11.11.11.11
+            subnet_mask: 255.255.255.255
+        neighbor:
+          - neighbor_ip: 2.2.2.2
+
+  interface:
+    physical_interfaces:
+      - name: GigabitEthernet1
+        ip_address:
+          address: 192.168.100.1
+          mask: 255.255.255.0
+      - name: GigabitEthernet1.10
+        ip_nat_direction: outside
+        encapsulation_dot1q: 10
+        vrf_forwarding: test
+        ip_address:
+          address: 192.168.10.1
+          mask: 255.255.255.0
+      - name: GigabitEthernet1.11
+        ip_nat_direction: outside
+        encapsulation_dot1q: 11
+        vrf_forwarding: test
+        ip_address:
+          address: 192.168.11.1
+          mask: 255.255.255.0
+      - name: GigabitEthernet1.12
+        ip_nat_direction: outside
+        encapsulation_dot1q: 12
+        vrf_forwarding: test
+        ip_address:
+          address: 192.168.12.1
+          mask: 255.255.255.0
+      - name: GigabitEthernet1.13
+        ip_nat_direction: outside
+        encapsulation_dot1q: 13
+        vrf_forwarding: test
+        ip_address:
+          address: 192.168.13.1
+          mask: 255.255.255.0
+      - name: GigabitEthernet1.14
+        ip_nat_direction: outside
+        encapsulation_dot1q: 14
+        ip_address:
+          address: 192.168.14.1
+          mask: 255.255.255.0

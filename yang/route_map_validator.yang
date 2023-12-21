@@ -1,0 +1,77 @@
+/* 
+YAML Route Map Validator
+Used by yang2dsdl to validate that user input YAML is in the correct format
+Author: James Duvall 
+*/
+
+
+module route_map_validator {
+    namespace "https://github.com/jamesduv9/network_dsl/route_map_validator.yang";
+    prefix rmv;
+    import ietf-inet-types {
+        prefix inet;
+    }
+    grouping route_map_validator {
+        list route_map {
+            key name;
+            leaf name {
+                description "route-map name";
+                type string;
+            }
+            list sequence {
+                key seq_num;
+                leaf seq_num {
+                    description "route-map sequence number definition";
+                    type string;
+                }
+                leaf operation {
+                    description "route-map permit or deny";
+                    type enumeration {
+                        enum permit;
+                        enum deny;
+                    }
+                    mandatory true;
+                }
+                leaf description {
+                    type string;
+                }
+                container match {
+                    description "specific match parameters";
+                    container ip_address {
+                        choice matching_ip {
+                            case prefix_list {
+                                leaf prefix_list {
+                                    /*leafref to prefix list def*/
+                                    type leafref {
+                                        path "/device/prefix_list/name";
+                                    }
+                                }
+                            }
+                            case access_list {
+                                leaf access_list {
+                                    /*leafref to access list def*/
+                                    type string;
+                                }
+                            }
+                        }
+                    }
+                    leaf-list interfaces {
+                        //leafref to interface
+                        type string;
+                    }
+                }
+                container set {
+                    description "Set values for successful match";
+                    leaf local_preference {
+                        type uint32;
+                    }
+                    container ip_next_hop {
+                        leaf-list address {
+                            type inet:ipv4-address;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,115 @@
+module physical_interface_validator {
+    namespace "https://github.com/jamesduv9/network-dsl/yang/physical_interface_validator.yang";
+    prefix piv;
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+    typedef valid_vlan {
+        type uint16 {
+            range "2..1001|1006..4094";
+        }
+    }
+    grouping physical_interface_validator {
+        list physical_interfaces {
+            key name;
+            leaf name {
+                /*We will automatically split the subinterface and include dot1q when used*/
+                description "Name of the interface WITH subinterface";
+                type string {
+                    pattern 
+                    "(GigabitEthernet[0-9]([/][0-9]){0,2}|TenGigabitEthernet[0-9]([/][0-9]){0,2}|TwentyGigabitEthernet[0-9]([/][0-9]){0,2})([.]\d+)?";
+                }
+            }
+            leaf encapsulation_dot1q {
+                type valid_vlan;
+                must "contains(../name, '.') and (not(../switchport) or ../switchport = 'false')" {
+                    error-message "encap dot1q cannot be enabled on switchport interfaces, or non subinterfaces";
+                }
+            }
+            leaf switchport {
+                description "If true, this becomes a l2 interface";
+                type boolean;
+                must "not(contains(../name, '.') and current() = 'true')" {
+                    error-message "Cannot use switchport AND subinterface";
+                }
+            }
+            leaf vrf_forwarding {
+                //leafref to vrfs
+                description "vrf applied to this interface";
+                type string;
+                must "not(../switchport) or ../switchport = 'false'" {
+                    error-message "Cannot apply a vrf to an interface configured as a switchport (layer2)";
+                }
+            }
+            leaf ip_nat_direction {
+                type enumeration {
+                    enum inside;
+                    enum outside;
+                }
+                must "not(../switchport) or ../switchport = 'false'" {
+                    error-message "Cannot apply NAT to an interface configured as a switchport (layer2)";
+                }
+            }
+            list ip_access_group {
+                key "direction";
+                leaf direction {
+                    type enumeration {
+                        enum in;
+                        enum out;
+                    }
+                    
+                }
+                choice name_or_number{
+                    case name {
+                        leaf name {
+                            //leafref to acl
+                            description "ACL name";
+                            type string;
+                        }
+                    }
+                    case number {
+                        leaf number {
+                            description "standard or extended acl number";
+                            type uint16 {
+                                range "1..99|1300..1999";
+                            }
+                        }
+                    }
+                }
+            }
+            container ip_address {
+                leaf address {
+                    type inet:ipv4-address;
+                }
+                leaf mask {
+                    type inet:ipv4-address;
+                }
+                must "not(../switchport) or ../switchport = 'false'" {
+                    error-message "Cannot add an ip to an interface configured as a switchport (layer2)";
+                }
+            }
+            container switchport_mode {
+                choice mode {
+                    case access {
+                        container access {
+                            leaf vlan {
+                                type valid_vlan;
+                                description "Untagged vlan for access interface";
+                            }
+                        }
+                    }
+                    case trunk {
+                        container trunk {
+                            leaf-list allowed_vlans {
+                                description "List of vlans allowed on the trunk";
+                                type valid_vlan;
+                            } 
+                        }
+                    }
+                    
+                }
+            }
+        }
+    }
+}

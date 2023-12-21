@@ -1,0 +1,11 @@
+__pycache__
+.pytest_cache
+*.dsrl
+*.rng
+*.sch
+yang/*.xml
+.venv
+*.tmp
+ncc_edit.py
+.gitlab-ci.yml
+*.txt

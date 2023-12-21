@@ -1,0 +1,60 @@
+/* 
+YAML Router data
+Used by yang2dsdl to validate that user input YAML is in the correct format
+Author: James Duvall 
+*/
+
+module device_validator {
+    yang-version "1";
+    namespace "https://github.com/jamesduv9/network_dsl/device_validator.yang";
+    prefix dv;
+    import physical_interface_validator {
+        prefix piv;
+    }
+    import route_map_validator {
+        prefix rmv;
+    }
+    import prefix_list_validator {
+        prefix plv;
+    }
+    import bgp_validator {
+        prefix bgpv;
+    }
+    import static_route_validator {
+        prefix srv;
+    }
+    import environment_info {
+        prefix env;
+    }
+    revision 2023-12-16 {
+        description "Adding physical interface validator";
+    }
+    revision 2023-12-10 {
+        description "Adding static routing";
+    }
+    revision 2023-12-09 {
+        description "Adding prefix-list Module";
+    }
+    revision 2023-12-06 {
+        description "Initial creation of YANG model";
+    }
+
+
+    container device {
+        leaf type {
+            type enumeration {
+                enum CiscoIOSXE_WAN;
+                enum CiscoIOSXE_CUBE;
+            }
+            mandatory true;
+        }
+        uses env:environment_info;
+        uses bgpv:bgp_validator;
+        uses rmv:route_map_validator;
+        uses plv:prefix_list_validator;
+        uses srv:static_route_validator;
+        container interface {
+            uses piv:physical_interface_validator;
+        }
+    }
+}

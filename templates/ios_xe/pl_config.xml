@@ -1,0 +1,24 @@
+
+      <prefix-lists operation="replace">
+        
+        {% for prefix in pl %}
+        
+          {% for seq in prefix.sequence %}
+          <prefixes>
+            <name>{{ prefix.name }}</name>
+            <no>{{ seq.seq_num }}</no>
+            <action>{{ seq.action }}</action>
+            <ip>{{ seq.ip_prefix }}</ip>
+            {% if seq.ge is defined %}
+            <ge>{{ seq.ge }}</ge>
+            {% endif %}
+            {% if seq.le is defined %}
+            <le>{{ seq.le }}</le>
+            {% endif %}
+          </prefixes>
+          {% endfor %}
+        
+        {% endfor %}
+        
+        <sequence-number/>
+      </prefix-lists>

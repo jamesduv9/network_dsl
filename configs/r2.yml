@@ -1,0 +1,53 @@
+#Goal is to exhibit all possible (non-conflicting) functionality of the model
+#Used by test scripts to validate functionality
+
+device:
+  "@xmlns": "https://github.com/jamesduv9/network_dsl/device_validator.yang"
+  type: CiscoIOSXE_WAN
+  device_lab_ip: 192.168.1.62
+  device_prod_ip: 200.1.1.62
+  interface_mapping:
+    - prod_interface: GigabitEthernet0/1
+      lab_interface: GigabitEthernet1
+    - prod_interface: GigabitEthernet0/2
+      lab_interface: GigabitEthernet2
+    - prod_interface: GigabitEthernet0/3
+      lab_interface: GigabitEthernet3
+    - prod_interface: GigabitEthernet0/4
+      lab_interface: GigabitEthernet4
+  ip_route:
+    global:
+      - prefix: 1.1.1.1
+        mask: 255.255.255.255
+        next_hop_both: 
+          next_hop_ip: 192.168.100.1
+          next_hop_interface: GigabitEthernet1
+
+  router_bgp:
+    asn: 65000
+    router_id: 192.168.2.2
+   
+    neighbor:
+      - neighbor_ip: 1.1.1.1
+        shutdown: false
+        remote_as: 65000
+        disable_connected_check: true
+    address_family:
+      ipv4_unicast:
+        network:
+          - ip_network: 22.22.22.22
+            subnet_mask: 255.255.255.255
+        neighbor:
+          - neighbor_ip: 1.1.1.1
+
+  interface:
+    physical_interfaces:
+      # - name: Loopback0 
+      #   switchport: false
+      #   ip_address:
+      #     address: 2.2.2.2
+      #     mask: 255.255.255.255
+      - name: GigabitEthernet1
+        ip_address:
+          address: 192.168.100.2
+          mask: 255.255.255.0

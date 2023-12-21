@@ -1,0 +1,93 @@
+device:
+  "@xmlns": "https://github.com/jamesduv9/network_dsl/device_validator.yang"
+  type: CiscoIOSXE_WAN
+  device_lab_ip: 192.168.1.62
+  device_prod_ip: 200.1.1.62
+  interface_mapping:
+    - prod_interface: GigabitEthernet0/1
+      lab_interface: GigabitEthernet1
+    - prod_interface: GigabitEthernet0/2
+      lab_interface: GigabitEthernet2
+    - prod_interface: GigabitEthernet0/3
+      lab_interface: GigabitEthernet3
+    - prod_interface: GigabitEthernet0/4
+      lab_interface: GigabitEthernet4
+  ip_route:
+    vrf:
+      - prefix: 192.168.0.0
+        vrf: test
+        next_hop_ip: 192.168.0.1
+    global:
+      - prefix: 192.168.0.0
+        mask: 255.255.255.0
+        next_hop_ip: 192.168.0.1
+
+  route_map:
+    - name: example_outbound
+      sequence:
+        - seq_num: 10
+          operation: permit
+          match:
+            ip_address:
+              prefix_list: some_pl
+              # access_list: test
+
+
+  prefix_list:
+    - name: some_pl
+      sequence:
+        - seq_num: 10
+          ip_prefix: 192.168.1.0/24
+          ge: 12
+          action: permit
+          
+  router_bgp:
+    asn: 65000
+    router_id: 192.168.1.1
+    peer_group:
+      - name: EXAMPLE_LR
+        remote_as: 65001
+        fallover_bfd: singlehop
+        description: Testing Viasat peer-group will this diff
+        disable_connected_check: true
+      - name: EXAMPLE_LR2
+        remote_as: 65002
+        fallover_bfd: singlehop
+        description: Testing Viasat peer-group
+        disable_connected_check: true
+      - name: EXAMPLE_LR3
+        remote_as: 65002
+        fallover_bfd: singlehop
+        description: Testing Viasat peer-group
+        next_hop_self: true
+        route_map:
+          - direction: in
+            name: example_outbound
+          - direction: out
+            name: example_outbound
+        disable_connected_check: true
+   
+    neighbor:
+      - neighbor_ip: 192.168.1.251
+        shutdown: False
+        peer_group: EXAMPLE_LR2
+        test:
+          icmp: 
+            max_latency: 100
+            max_jitter: 200
+          bgp:
+            received_route: 192.168.0.0/24
+            advertised_route: 
+              - 192.168.0.0/24
+              - 192.168.2.0/24
+              - 192.168.3.0/24
+              - 192.168.4.0/24
+    address_family:
+      ipv4_unicast:
+        network:
+          - ip_network: 10.108.0.0
+            subnet_mask: 255.255.255.0
+        neighbor:
+          - neighbor_ip: 192.168.1.251
+            # next_hop_self: True
+              

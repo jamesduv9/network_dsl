@@ -1,0 +1,23 @@
+device:
+  "@xmlns": "https://github.com/jamesduv9/network_dsl/device_validator.yang"
+  type: CiscoIOSXE_WAN
+  device_lab_ip: 192.168.1.62
+  device_prod_ip: 200.1.1.62
+  interface_mapping:
+    - prod_interface: GigabitEthernet0/1
+      lab_interface: GigabitEthernet1
+    - prod_interface: GigabitEthernet0/2
+      lab_interface: GigabitEthernet2
+    - prod_interface: GigabitEthernet0/3
+      lab_interface: GigabitEthernet3
+    - prod_interface: GigabitEthernet0/4
+      lab_interface: GigabitEthernet4
+  route_map:
+    - name: example_outbound
+      sequence:
+        - seq_num: 10
+          operation: permit
+          match:
+            ip_address:
+              prefix_list: some_pl
+              # access_list: test

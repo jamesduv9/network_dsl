@@ -1,0 +1,23 @@
+<config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <native xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-native">
+    {% if bgp is defined %}
+    <router>
+        {{ bgp }}
+    </router>
+    {% endif %}
+    {% if prefix_list is defined or ip_route is defined %}
+    <ip>
+        {{ prefix_list }}
+        {{ ip_route }}
+    </ip>
+    {% endif %}
+    {% if route_map is defined %}
+        {{ route_map }}
+    {% endif %}
+    {% if physical_interfaces is defined %}
+    <interface>
+        {{ physical_interfaces }}
+    </interface>
+    {% endif %}
+  </native>
+</config>

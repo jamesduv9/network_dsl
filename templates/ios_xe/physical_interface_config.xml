@@ -1,0 +1,60 @@
+    {% for interface in physical_interfaces %}
+      <{{ interface.base_interface }} operation="replace">
+        <name>{{ interface.identifier }}</name>
+        {% if interface.switchport == True %}
+        <switchport-conf>
+          <switchport>true</switchport>
+        </switchport-conf>
+        {% endif %}
+        {% if interface.switchport_mode is defined %}
+         {% if interface.switchport_mode.access is defined %}
+        <switchport>
+          <access xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-switch">
+            <vlan>
+              <vlan>{{ interface.switchport_mode.access.vlan }}</vlan>
+            </vlan>
+          </access>
+        </switchport>
+         {% endif %}
+        {% endif %}
+        {% if interface.encapsulation_dot1q is defined %}
+        <encapsulation>
+            <dot1Q>
+                <vlan-id>{{ interface.encapsulation_dot1q }}</vlan-id>
+            </dot1Q>
+        </encapsulation>
+        {% else %}
+        <logging>
+          <event>
+            <link-status-enable>true</link-status-enable>
+          </event>
+        </logging>
+        <negotiation xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-ethernet">
+          <auto>true</auto>
+        </negotiation>
+        {% endif %}
+        {% if interface.shutdown %}
+        <shutdown/>
+        {% endif %}
+        {% if interface.vrf_forwarding is defined %}
+            <vrf>
+              <forwarding>{{ interface.vrf_forwarding }}</forwarding>
+            </vrf>
+        {% endif %}
+        {% if interface.ip_address is defined %}
+        <ip>
+          <address>
+            <primary>
+              <address>{{ interface.ip_address.address }}</address>
+              <mask>{{ interface.ip_address.mask }}</mask>
+            </primary>
+          </address>
+        {% if interface.ip_nat_direction is defined %}
+        <nat xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-nat">
+            <{{ interface.ip_nat_direction }}/>
+        </nat>
+        {% endif %}
+        </ip>
+        {% endif %}
+      </{{ interface.base_interface }}>
+    {% endfor %}

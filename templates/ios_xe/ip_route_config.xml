@@ -1,0 +1,72 @@
+      
+
+      <route operation="replace">
+        {% for vrf_name, vrf_values in vrf_dict.items() %}
+        <vrf>
+        <name>{{ vrf_name }}</name>
+        {% for ip_route in vrf_values %}
+        <ip-route-interface-forwarding-list>
+          <prefix>{{ ip_route.prefix }}</prefix>
+          <mask>{{ ip_route.mask }}</mask>
+          <fwd-list>
+            {% if ip_route.next_hop_ip is defined %}
+            <fwd>{{ ip_route.next_hop_ip }}</fwd>
+            {% elif ip_route.next_hop_interface is defined %}
+            <fwd>{{ ip_route.next_hop_interface }}</fwd>
+            {% elif ip_route.next_hop_both is defined %}
+            <fwd>{{ ip_route.next_hop_both.next_hop_interface }}</fwd>
+            <interface-next-hop>
+              <ip-address>{{ ip_route.next_hop_both.next_hop_ip }}</ip-address>
+              {% if ip_route.next_hop_both.metric is defined %}
+              <metric>{{ ip_route.metric }}</metric>
+              {% endif %}
+              {% if ip_route.next_hop_both.name is defined %}
+              <name>{{ ip_route.name }}</name>
+              {% endif %}
+            </interface-next-hop>
+            {% endif %}
+            {% if ip_route.metric is defined %}
+            <metric>{{ ip_route.metric }}</metric>
+            {% endif %}
+            {% if ip_route.name is defined %}
+            <name>{{ ip_route.name }}</name>
+            {% endif %}
+          </fwd-list>
+        </ip-route-interface-forwarding-list>
+        {% endfor %}
+        </vrf>
+        {% endfor %}
+        {% if ip_routes.global is defined %}
+        {% for ip_route in ip_routes.global %}
+        <ip-route-interface-forwarding-list>
+          <prefix>{{ ip_route.prefix }}</prefix>
+          <mask>{{ ip_route.mask }}</mask>
+          <fwd-list>
+            {% if ip_route.next_hop_ip is defined %}
+            <fwd>{{ ip_route.next_hop_ip }}</fwd>
+            {% elif ip_route.next_hop_interface is defined %}
+            <fwd>{{ ip_route.next_hop_interface }}</fwd>
+            {% elif ip_route.next_hop_both is defined %}
+            <fwd>{{ ip_route.next_hop_both.next_hop_interface }}</fwd>
+            <interface-next-hop>
+              <ip-address>{{ ip_route.next_hop_both.next_hop_ip }}</ip-address>
+              {% if ip_route.next_hop_both.metric is defined %}
+              <metric>{{ ip_route.metric }}</metric>
+              {% endif %}
+              {% if ip_route.next_hop_both.name is defined %}
+              <name>{{ ip_route.name }}</name>
+              {% endif %}
+            </interface-next-hop>
+            {% endif %}
+            {% if ip_route.metric is defined %}
+            <metric>{{ ip_route.metric }}</metric>
+            {% endif %}
+            {% if ip_route.name is defined %}
+            <name>{{ ip_route.name }}</name>
+            {% endif %}
+          </fwd-list>
+        </ip-route-interface-forwarding-list>
+        {% endfor %}
+        {% endif %}
+      </route>
+      

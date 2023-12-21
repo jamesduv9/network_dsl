@@ -1,0 +1,35 @@
+module environment_info {
+    namespace "https://github.com/jamesduv9/network-dsl/yang/environment_info.yang";
+    prefix env;
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+    grouping environment_info {
+        leaf device_lab_ip {
+            mandatory true;
+            type inet:ipv4-address;
+        }
+
+        leaf device_prod_ip {
+            mandatory true;
+            type inet:ipv4-address;
+        }
+        list interface_mapping {
+            key prod_interface;
+            leaf prod_interface {
+                description "Interface used in production environment";
+                mandatory true;
+                type string {
+                    pattern 
+                    "(GigabitEthernet[0-9]([/][0-9]){0,2}|TenGigabitEthernet[0-9]([/][0-9]){0,2}|TwentyGigabitEthernet[0-9]([/][0-9]){0,2})([.]\d+)?";
+                }
+            }
+            leaf lab_interface {
+                description "Interface used in lab environment";
+                type string;
+                mandatory true;
+            }
+        }
+    }
+}

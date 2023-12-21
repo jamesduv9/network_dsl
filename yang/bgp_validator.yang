@@ -1,0 +1,196 @@
+/* 
+YAML BGP Validator
+Used by yang2dsdl to validate that user input YAML is in the correct format
+Author: James Duvall 
+*/
+
+module bgp_validator {
+    namespace "https://github.com/jamesduv9/network_dsl/bgp_validator.yang";
+    prefix bgpv;
+    import ietf-inet-types {
+        prefix inet;
+    }
+    /*Grouping definition that is referenced in device_validator*/
+    grouping bgp_validator {
+        /*test grouping that is used to provide unit test variables*/
+        grouping test {
+            container icmp {
+                leaf max_latency {
+                    description "Max latency of a single ping allowed during the test";
+                    type uint16;
+                    units ms;
+                }
+                leaf max_jitter {
+                    description "Max calculated jitter on a 50 count ping";
+                    type uint16;
+                    units ms;
+                }
+            }
+            container bgp {
+                leaf-list received_route {
+                    description "Route expected to receive from peer in format 10.0.0.0/24";
+                    type inet:ipv4-prefix;
+                }
+                leaf-list advertised_route {
+                    description "Route expected to advertise to peer in format 10.0.0.0/24";
+                    type inet:ipv4-prefix;
+                }
+            }
+            leaf interface {
+                /*When interfaces are defined, figure the conditional out*/
+                type boolean;
+            }
+        }
+        /*neighbor_session_vars grouping for repeated neighbor variables
+            not(current()/../peer_group) == prevents these values from being defined if also includes a peer-group
+            Just configure these values inside the peer-group instead
+        */
+        grouping neighbor_session_vars {
+            leaf remote_as {
+                description "BGP Peer's remote ASN number, mandatory value if no peer-group";
+                type uint16;
+                mandatory true;
+                when "not(current()/../peer_group)";
+            }
+            leaf ebgp_multihop {
+                description "multi-hop support for the bgp peer";
+                type uint16 {
+                    range 1..16;
+                }
+                when "not(current()/../peer_group)";
+            }
+            leaf fallover_bfd {
+                description "bfd fallover options, single or multi hop";
+                type enumeration {
+                    enum singlehop;
+                    enum multihop;
+                }
+                when "not(current()/../peer_group)";
+            }
+            leaf description {
+                description "Give a solid description of the peer(s)";
+                /*Shoud I enforce some kind of typeref to a typedef for naming convention?*/
+                type string;
+            }
+            leaf shutdown {
+                description "To shut or not to shut";
+                type boolean;
+            }
+            leaf update_source {
+                type string;
+                when "not(current()/../peer_group)";
+                /*Need to make this a leafref to an existing interface*/
+            }
+            leaf peer_group {
+                type leafref {
+                    path "../../peer_group/name";
+                }
+            }
+            leaf disable_connected_check {
+                when "not(current()/../peer_group)";
+                type boolean;
+            }
+            leaf password {
+                when "not(current()/../peer_group)";
+                type string;
+            }
+            container test {
+                uses test;
+            }
+        }
+        grouping neighbor_policy_vars {
+            leaf next_hop_self {
+                when "not(current()/peer_group)";
+                type boolean;
+            }
+            list route_map {
+                key direction;
+                leaf direction {
+                    type enumeration {
+                        enum in;
+                        enum out;
+                    }
+                }
+                leaf name {
+                    /* leafref to route-map config */
+                    type leafref {
+                        path "/device/route_map/name";
+                    }
+                    // type string;
+                }
+            }
+            list prefix_list {
+                key direction;
+                leaf direction {
+                    type enumeration {
+                        enum in;
+                        enum out;
+                    }
+                }
+                leaf name {
+                    /* leafref to prefix-list config */
+                    type string;
+                }
+            }
+        }
+        grouping network_statement {
+            list network {
+                key ip_network;
+                leaf ip_network { 
+                    type inet:ipv4-address;
+                }
+                leaf subnet_mask {
+                    type inet:ipv4-address;
+                    mandatory true;
+                }
+            }
+        }
+        container router_bgp {
+            /*In order to make the router_bgp container optional
+              AND make asn + router_id mandatory when router_bgp
+              exists, using must statements instead of mandatory*/
+            must "asn" {
+                error-message "ASN missing from router_bgp data";
+            }
+            must "router_id" {
+                error-message "router_id missing from router_bgp data";
+            }
+            leaf asn {
+                type uint16;
+            }
+            leaf router_id {
+                type inet:ipv4-address;
+            }
+            list peer_group {
+                key name;
+                leaf name {
+                    type string;
+                }
+                uses neighbor_session_vars;
+                uses neighbor_policy_vars;
+            }
+            list neighbor {
+                key neighbor_ip;
+                leaf neighbor_ip {
+                    type inet:ipv4-address;
+                    mandatory true;
+                }
+                uses neighbor_session_vars;
+            }
+            container address_family {
+                container ipv4_unicast {
+                    uses network_statement;
+                    list neighbor {
+                        key neighbor_ip;
+                        leaf neighbor_ip {
+                            type leafref {
+                                path "../../../../neighbor/neighbor_ip";
+                            }
+                        }
+                        uses neighbor_policy_vars;
+                    }
+                }
+            }
+        }
+    }
+}

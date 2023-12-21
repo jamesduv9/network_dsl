@@ -1,0 +1,324 @@
+#Goal is to exhibit all possible (non-conflicting) functionality of the model
+#Used by test scripts to validate functionality
+
+device:
+  "@xmlns": "https://github.com/jamesduv9/network_dsl/device_validator.yang"
+  type: CiscoIOSXE_WAN
+  device_lab_ip: 192.168.1.62
+  device_prod_ip: 200.1.1.62
+  interface_mapping:
+    - prod_interface: GigabitEthernet0/1
+      lab_interface: GigabitEthernet1
+    - prod_interface: GigabitEthernet0/2
+      lab_interface: GigabitEthernet2
+    - prod_interface: GigabitEthernet0/3
+      lab_interface: GigabitEthernet3
+    - prod_interface: GigabitEthernet0/4
+      lab_interface: GigabitEthernet4
+  ip_route:
+    vrf:
+      - prefix: 192.168.0.0
+        vrf: mgmt
+        mask: 255.255.255.0
+        next_hop_ip: 192.168.0.1
+        metric: 10
+      - prefix: 192.168.10.0
+        vrf: mgmt
+        mask: 255.255.255.0
+        next_hop_ip: 192.168.10.1
+      - prefix: 192.168.20.0
+        vrf: test
+        mask: 255.255.255.0
+        next_hop_ip: 192.168.20.1
+        metric: 20
+      - prefix: 10.10.0.0
+        vrf: mgmt
+        mask: 255.255.0.0
+        next_hop_ip: 10.10.0.1
+        metric: 5
+      - prefix: 172.16.0.0
+        vrf: test
+        mask: 255.255.0.0
+        next_hop_ip: 172.16.0.1
+      - prefix: 192.168.30.0
+        vrf: mgmt
+        mask: 255.255.255.0
+        next_hop_ip: 192.168.30.1
+        metric: 15
+      - prefix: 10.20.0.0
+        vrf: test
+        mask: 255.255.0.0
+        next_hop_ip: 10.20.0.1
+        metric: 10
+      - prefix: 172.16.10.0
+        vrf: mgmt
+        mask: 255.255.255.0
+        next_hop_ip: 172.16.10.1
+      - prefix: 192.168.40.0
+        vrf: test
+        mask: 255.255.255.0
+        next_hop_ip: 192.168.40.1
+        metric: 20
+      - prefix: 10.30.0.0
+        vrf: mgmt
+        mask: 255.255.0.0
+        next_hop_ip: 10.30.0.1
+        metric: 5
+    global:
+      - prefix: 192.168.0.0
+        mask: 255.255.255.0
+        next_hop_ip: 192.168.0.1
+      - prefix: 61.61.61.61
+        mask: 255.255.255.255
+        next_hop_both:
+          next_hop_ip: 192.168.100.61
+          next_hop_interface: GigabitEthernet1
+      - prefix: 61.61.61.62
+        mask: 255.255.255.255
+        next_hop_both:
+          next_hop_ip: 192.168.100.61
+          next_hop_interface: GigabitEthernet1
+      - prefix: 61.61.61.63
+        mask: 255.255.255.255
+        next_hop_both:
+          next_hop_ip: 1.2.3.4
+          next_hop_interface: GigabitEthernet1
+
+  route_map:
+    - name: example_outbound
+      sequence:
+        - seq_num: 10
+          operation: permit
+          match:
+            ip_address:
+              prefix_list: some_plw
+              # access_list: test
+
+  prefix_list:
+    - name: some_plw
+      sequence:
+        - seq_num: 9
+          ip_prefix: 192.168.1.0/24
+          le: 32
+          action: permit
+        - seq_num: 20
+          ip_prefix: 10.10.2.0/24
+          le: 32
+          action: permit
+        - seq_num: 30
+          ip_prefix: 172.16.3.0/24
+          le: 32
+          action: deny
+        - seq_num: 40
+          ip_prefix: 192.168.4.0/24
+          le: 30
+          action: permit
+        - seq_num: 50
+          ip_prefix: 10.10.5.0/24
+          le: 30
+          action: deny
+        - seq_num: 60
+          ip_prefix: 172.16.6.0/24
+          le: 32
+          action: permit
+        - seq_num: 70
+          ip_prefix: 192.168.7.0/24
+          le: 29
+          action: deny
+        - seq_num: 80
+          ip_prefix: 10.10.8.0/24
+          le: 28
+          action: permit
+        - seq_num: 90
+          ip_prefix: 172.16.9.0/24
+          le: 32
+          action: deny
+        - seq_num: 100
+          ip_prefix: 192.168.10.0/24
+          le: 32
+          action: permit
+    - name: some_pl4
+      sequence:
+        - seq_num: 9
+          ip_prefix: 192.168.1.0/24
+          le: 32
+          action: permit
+        - seq_num: 20
+          ip_prefix: 10.10.2.0/24
+          le: 32
+          action: permit
+        - seq_num: 30
+          ip_prefix: 172.16.3.0/24
+          le: 32
+          action: deny
+        - seq_num: 40
+          ip_prefix: 192.168.4.0/24
+          le: 30
+          action: permit
+        - seq_num: 50
+          ip_prefix: 10.10.5.0/24
+          le: 30
+          action: deny
+        - seq_num: 60
+          ip_prefix: 172.16.6.0/24
+          le: 32
+          action: permit
+        - seq_num: 70
+          ip_prefix: 192.168.7.0/24
+          le: 29
+          action: deny
+        - seq_num: 80
+          ip_prefix: 10.10.8.0/24
+          le: 28
+          action: permit
+        - seq_num: 90
+          ip_prefix: 172.16.9.0/24
+          le: 32
+          action: deny
+        - seq_num: 100
+          ip_prefix: 192.168.10.0/24
+          le: 32
+          action: permit
+    - name: some_pl3
+      sequence:
+        - seq_num: 9
+          ip_prefix: 192.168.1.0/24
+          le: 32
+          action: permit
+        - seq_num: 20
+          ip_prefix: 10.10.2.0/24
+          le: 32
+          action: permit
+        - seq_num: 30
+          ip_prefix: 172.16.3.0/24
+          le: 32
+          action: deny
+        - seq_num: 40
+          ip_prefix: 192.168.4.0/24
+          le: 30
+          action: permit
+        - seq_num: 50
+          ip_prefix: 10.10.5.0/24
+          le: 30
+          action: deny
+        - seq_num: 60
+          ip_prefix: 172.16.6.0/24
+          le: 32
+          action: permit
+        - seq_num: 70
+          ip_prefix: 192.168.7.0/24
+          le: 29
+          action: deny
+        - seq_num: 80
+          ip_prefix: 10.10.8.0/24
+          le: 28
+          action: permit
+        - seq_num: 90
+          ip_prefix: 172.16.9.0/24
+          le: 32
+          action: deny
+        - seq_num: 100
+          ip_prefix: 192.168.10.0/24
+          le: 32
+          action: permit
+    - name: some_pl2
+      sequence:
+        - seq_num: 9
+          ip_prefix: 192.168.1.0/24
+          le: 32
+          action: permit
+        - seq_num: 20
+          ip_prefix: 10.10.2.0/24
+          le: 32
+          action: permit
+        - seq_num: 30
+          ip_prefix: 172.16.3.0/24
+          le: 32
+          action: deny
+        - seq_num: 40
+          ip_prefix: 192.168.4.0/24
+          le: 30
+          action: permit
+        - seq_num: 50
+          ip_prefix: 10.10.5.0/24
+          le: 30
+          action: deny
+        - seq_num: 60
+          ip_prefix: 172.16.6.0/24
+          le: 32
+          action: permit
+        - seq_num: 70
+          ip_prefix: 192.168.7.0/24
+          le: 29
+          action: deny
+        - seq_num: 80
+          ip_prefix: 10.10.8.0/24
+          le: 28
+          action: permit
+        - seq_num: 90
+          ip_prefix: 172.16.9.0/24
+          le: 32
+          action: deny
+        - seq_num: 100
+          ip_prefix: 192.168.10.0/24
+          le: 32
+          action: permit
+
+  router_bgp:
+    asn: 65000
+    router_id: 192.168.1.1
+    peer_group:
+      - name: EXAMPLE_LR
+        remote_as: 65001
+        fallover_bfd: singlehop
+        description: Testing Viasat peer-group will this diff
+        disable_connected_check: true
+      - name: EXAMPLE_LR2
+        remote_as: 65002
+        fallover_bfd: singlehop
+        description: Testing Viasat peer-group
+        disable_connected_check: true
+      - name: EXAMPLE_LR3
+        remote_as: 65002
+        fallover_bfd: singlehop
+        description: Testing Viasat peer-group
+        next_hop_self: true
+        route_map:
+          - direction: in
+            name: example_outbound
+          - direction: out
+            name: example_outbound
+        disable_connected_check: true
+
+    neighbor:
+      - neighbor_ip: 192.168.1.251
+        shutdown: False
+        peer_group: EXAMPLE_LR2
+        test:
+          icmp:
+            max_latency: 100
+            max_jitter: 200
+          bgp:
+            received_route: 192.168.0.0/24
+            advertised_route:
+              - 192.168.0.0/24
+              - 192.168.2.0/24
+              - 192.168.3.0/24
+              - 192.168.4.0/24
+    address_family:
+      ipv4_unicast:
+        network:
+          - ip_network: 10.108.0.0
+            subnet_mask: 255.255.255.0
+        neighbor:
+          - neighbor_ip: 192.168.1.251
+            # next_hop_self: True
+
+  interface:
+    physical_interfaces:
+      - name: GigabitEthernet4.10
+        encapsulation_dot1q: 10
+        switchport: false
+        ip_address:
+          address: 10.100.1.10
+          mask: 255.255.255.0

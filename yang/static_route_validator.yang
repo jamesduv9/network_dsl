@@ -1,0 +1,72 @@
+module static_route_validator {
+    namespace "https://github.com/jamesduv9/network_dsl/static_route_validator.yang";
+    prefix srv;
+    import ietf-inet-types {
+        prefix inet;
+    }
+    grouping static_route_validator {
+        grouping static_route_configs {
+            leaf prefix {
+                description "Destination prefix network address";
+                type inet:ipv4-address;
+            }
+            leaf vrf {
+                //typeref to vrfs
+                description "VRF for this static route";
+                type string;
+            }
+            leaf mask {
+                description "Destination prefix network mask";
+                type inet:ipv4-address;
+            }
+            choice next_hop_choice {
+                //probably a better way to do this, but choice for now
+                case next_hop_ip {
+                    leaf next_hop_ip {
+                        description "next hop IP address";
+                        type inet:ipv4-address;
+                    }
+                }
+                case next_hop_interface {
+                    leaf next_hop_interface {
+                        //leafref to interfaces
+                        description "next hop interface";
+                        type string;
+                    }
+                }
+                case next_hop_both {
+                    container next_hop_both {
+                        leaf next_hop_interface {
+                            //leafref to interfaces
+                            description "next hop interface";
+                            type string;
+                        }
+                        leaf next_hop_ip {
+                            description "next hop IP address";
+                            type inet:ipv4-address;
+                        }
+                    }
+                }
+            }
+            leaf metric {
+                type uint8 {
+                    range "1..255";
+                }
+            }
+            leaf name {
+                type string;
+            }
+        }
+        container ip_route {
+            list vrf {
+                // Using 3 keys in the case that we have traffic eng. on prefix length
+                key "prefix vrf mask";
+                uses static_route_configs;
+            }
+            list global {
+                key "prefix mask";
+                uses static_route_configs;
+            }
+        }
+    }
+}

@@ -1,0 +1,57 @@
+module prefix_list_validator {
+    namespace "https://github.com/jamesduv9/network_dsl/prefix_list_validator.yang";
+    prefix plv;
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    grouping prefix_list_validator {
+        list prefix_list {
+            key name;
+            leaf name {
+                type string;
+            }
+            list sequence {
+                key seq_num;
+                leaf seq_num {
+                    type uint16;
+                }
+                leaf ip_prefix {
+                    type inet:ipv4-prefix;
+                    mandatory true;
+                }
+                choice filter {
+                    case ge {
+                        leaf ge {
+                            type uint8 {
+                                range "0..32";
+                            }
+                        }
+                    }
+                    case le {
+                        leaf le {
+                            type uint8 {
+                                range "0..32";
+                            }
+
+                        }
+                    }
+                    case eq {
+                        leaf eq {
+                            type uint8 {
+                                range "0..32";
+                            }
+                        }
+                    }
+                }
+                leaf action {
+                    type enumeration {
+                        enum permit;
+                        enum deny;
+                    }
+                    mandatory true;
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,128 @@
+<bgp xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-bgp" operation="replace">
+    <id>{{ asn }}</id>
+    {% if router_id is defined %}
+      <bgp>
+        <log-neighbor-changes>true</log-neighbor-changes>
+        <router-id>
+          <ip-id>{{ router_id }}</ip-id>
+        </router-id>
+      </bgp>
+    {% endif %}
+    {% if peer_group is defined %}
+      <peer-group>
+        {% for pg in peer_group %}
+          <neighbor>
+            <id>{{ pg.name }}</id>
+            <peer-group/>
+            {% if pg.disable_connected_check is defined %}
+              <disable-connected-check/>
+            {% endif %}
+            {% if pg.ebgp_multihop is defined %}
+              <ebgp-multihop>
+               <max-hop>{{ pg.max_hop }}</max-hop>
+              </ebgp-multihop>
+            {% endif %}
+            {% if pg.description is defined %}
+              <description>{{ pg.description }}</description>
+            {% endif %}
+            {% if pg.fallover_bfd is defined %}
+              <fall-over>
+                <bfd>
+                  {% if pg.fallover_bfd == "multihop" %}
+                  <multi-hop/>
+                  {% endif %}
+                  {% if pg.fallover_bfd == "singlehop" %}
+                  <single-hop/>
+                  {% endif %}
+                </bfd>
+              </fall-over>
+            {% endif %}
+            <remote-as>{{pg.remote_as}}</remote-as>
+          </neighbor>
+        {% endfor %}
+      </peer-group>
+    {% endif %}
+    {% if neighbor is defined %}
+      {% for nei in neighbor %}
+        <neighbor>
+          <id>{{ nei.neighbor_ip }}</id>
+          {% if nei.description is defined %}
+          <description>{{ nei.description }}</description>
+          {% endif %}
+          {% if nei.remote_as is defined %}
+          <remote-as>{{ nei.remote_as }}</remote-as>
+          {% endif %}
+          {% if nei.peer_group is defined %}
+          <peer-group>
+            <peer-group-name>{{ nei.peer_group }}</peer-group-name>
+          </peer-group>
+          {% endif %}
+          {% if nei.shutdown %}
+          <shutdown/>
+          {% endif %}
+        </neighbor>
+      {% endfor %}
+    {% endif %}
+    {% if address_family is defined %}
+      {% for af_type, af_values in address_family.items() %}
+        <address-family>
+          {% if af_type == "ipv4_unicast" %}
+          <no-vrf>
+            <ipv4>
+              <af-name>unicast</af-name>
+              <ipv4-unicast>
+                {% for neighbor in af_values.neighbor %}
+                  <neighbor>
+                    <id>{{ neighbor.neighbor_ip }}</id>
+                    <activate/>
+                    {% if neighbor.next_hop_self is defined %}
+                    <next-hop-self/>
+                    {% endif %}
+                    {% if neighbor.route_map is defined %}
+                      {% for rm in neighbor.route_map %}
+                        <route-map>
+                          <inout>{{ rm.direction }}</inout>
+                          <route-map-name>{{ rm.name }}</route-map-name>
+                        </route-map>
+                      {% endfor %}
+                    {% endif %}
+                  </neighbor>
+                {% endfor %}
+                {% if af_values.network is defined %}
+                  <network>
+                  {% for net in af_values.network %}
+                    <with-mask>
+                      <number>{{ net.ip_network }}</number>
+                      <mask>{{ net.subnet_mask }}</mask>
+                    </with-mask>
+                  {% endfor %}
+                  </network>
+                {% endif %}
+                {% if peer_group is defined %}
+                  <peer-group>
+                  {% for pg in peer_group %}
+                    <neighbor>
+                      <id>{{ pg.name }}</id>
+                      {% if pg.route_map is defined %}
+                        {% for rm in pg.route_map %}
+                          <route-map>
+                            <inout>{{ rm.direction }}</inout>
+                            <route-map-name>{{ rm.name }}</route-map-name>
+                          </route-map>
+                        {% endfor %}
+                      {% endif %}
+                      {% if pg.next_hop_self is defined %}
+                      <next-hop-self/>
+                      {% endif %}
+                    </neighbor>
+                  {% endfor %}
+                  </peer-group>
+                {% endif %}
+              </ipv4-unicast>
+            </ipv4>
+          </no-vrf>
+          {% endif %}
+        </address-family>
+      {% endfor %}
+    {% endif %}
+</bgp>

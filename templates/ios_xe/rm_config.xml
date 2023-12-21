@@ -1,0 +1,45 @@
+    {% for route_map in rm %}
+    <route-map>
+      <name>{{ route_map.name }}</name>
+      {% for sequence in route_map.sequence %}
+      <route-map-seq xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-route-map" operation="replace">
+        <ordering-seq>{{ sequence.seq_num }}</ordering-seq>
+        <operation>{{ sequence.operation }}</operation>
+        <sequence>{{ sequence.seq_num }}</sequence>
+        <description>Some Action</description>
+        {% if sequence.set is defined %}
+        <set>
+          {% if sequence.set.local_preference is defined %}
+          <local-preference>{{ sequence.set.local_preference }}</local-preference>
+          {% endif %}
+          {% if sequence.set.ip_next_hop %}
+          <ip>
+            <next-hop>
+              {% for addr in sequence.set.ip_next_hop.address %}
+              <address>{{ addr }}</address>
+              {% endfor %}
+            </next-hop>
+          </ip>
+          {% endif %}
+        </set>
+        {% endif %}
+        {% if sequence.match is defined %}
+        <match>
+          {% if sequence.match.ip_address is defined %}
+          <ip>
+            <address>
+              {% if sequence.match.ip_address.prefix_list is defined %}
+              <prefix-list>{{ sequence.match.ip_address.prefix_list }}</prefix-list>
+              {% endif %}
+              {% if sequence.match.ip_address.access_list is defined %}
+              <access-list>{{ sequence.match.ip_address.access_list }}</access-list>
+              {% endif %}
+            </address>
+          </ip>
+          {% endif %}
+        </match>
+        {% endif %}
+      </route-map-seq>
+      {% endfor %}
+    </route-map>
+    {% endfor %}

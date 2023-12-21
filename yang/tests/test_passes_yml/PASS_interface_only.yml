@@ -1,0 +1,28 @@
+#Goal is to exhibit all possible (non-conflicting) functionality of the model
+#Used by test scripts to validate functionality
+
+device:
+  "@xmlns": "https://github.com/jamesduv9/network_dsl/device_validator.yang"
+  type: CiscoIOSXE_WAN
+  device_lab_ip: 192.168.1.62
+  device_prod_ip: 200.1.1.62
+  interface_mapping:
+    - prod_interface: GigabitEthernet0/1
+      lab_interface: GigabitEthernet1
+    - prod_interface: GigabitEthernet0/2
+      lab_interface: GigabitEthernet2
+    - prod_interface: GigabitEthernet0/3
+      lab_interface: GigabitEthernet3
+    - prod_interface: GigabitEthernet0/4
+      lab_interface: GigabitEthernet4
+  interface:
+    physical_interfaces:
+      - name: TenGigabitEthernet3.10
+        vrf_forwarding: test
+        ip_nat_direction: inside
+        ip_access_group:
+          - direction: in
+            name: acl_name
+        ip_address:
+          address: 192.168.1.1
+          mask: 255.255.255.0
