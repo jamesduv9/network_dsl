@@ -18,7 +18,7 @@ Outputting Edit-Config RPC:
 
 4. Finally, the Python objects are used to generate an edit-config RPC in XML format. This is achieved through Jinja2 templates like edit_config.xml. The print_config method in classes like ConfigInterface, StaticRoutes, etc., renders the final XML configuration.
 
-![image](https://github.com/jamesduv9/network_dsl/assets/32336049/93f54aa6-d4eb-4eae-871d-a9767315befb)
+
 
 ## Example
 ```
